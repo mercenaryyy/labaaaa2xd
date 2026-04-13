@@ -1,4 +1,4 @@
-﻿#include <iostream>
+#include <iostream>
 #include <string>
 #include <vector>
 #include <memory>
@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <iomanip>
 #include <ctime>
+#include <regex>
+
 enum class TariffType {
     ECONOMY,
     STANDARD,
@@ -251,6 +253,24 @@ public:
 
 ProviderSystem* ProviderSystem::instance = nullptr;
 
+static bool validatePhoneNumber(const std::string& phone) {
+    std::regex phonePattern(R"(^(\+7|8)[0-9]{10}$)");
+    return std::regex_match(phone, phonePattern);
+}
+
+static std::string inputPhone(const std::string& prompt) {
+    std::string phone;
+    while (true) {
+        std::cout << prompt;
+        std::getline(std::cin, phone);
+
+        if (validatePhoneNumber(phone)) {
+            return phone;
+        }
+        std::cout << "Ошибка! Введите номер телефона в формате: +7XXXXXXXXXX или 8XXXXXXXXXX (10 цифр после кода)\n";
+    }
+}
+
 static int inputInt(const std::string& prompt, int min = 0, int max = 1000000) {
     int value;
     std::string line;
@@ -329,7 +349,6 @@ static void showMenu() {
 int main() {
     system("chcp 1251 > nul");
 
-
     ProviderSystem* system = ProviderSystem::getInstance();
 
     int choice;
@@ -361,7 +380,7 @@ int main() {
         case 4: {
             std::string name = inputString("Введите ФИО клиента: ");
             std::string address = inputString("Введите адрес: ");
-            std::string phone = inputString("Введите телефон: ");
+            std::string phone = inputPhone("Введите телефон (в формате +7XXXXXXXXXX или 8XXXXXXXXXX): ");
 
             system->displayAllTariffs();
             int tariffId = inputInt("Введите ID тарифа для клиента: ");
